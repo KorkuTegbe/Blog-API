@@ -31,12 +31,12 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Please confirm password'],
         minlength: 8,
     },
-    blogs: [
-        {
-            type: objectId,
-            ref: 'Blog'
-        }
-    ],
+    // blogs: [
+    //     {
+    //         type: objectId,
+    //         ref: 'Blog'
+    //     }
+    // ],
 })
 
 

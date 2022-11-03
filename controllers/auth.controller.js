@@ -1,6 +1,8 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const {promisify} = require('util')
+const appError = require('../utils/appError') 
 const User = require('../models/user.model')
 
 
@@ -34,11 +36,10 @@ const signup = async (req,res) => {
             passwordConfirm
         })
 
-        
         const token = jwt.sign(
             { userId: user.id }, 
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: process.env.JWT_EXPIRES }
         )
 
         const cookieOptions = {
@@ -88,9 +89,9 @@ const login = async (req, res) => {
         // Create token
         const token = jwt.sign(
           { user_id: user._id },
-          process.env.TOKEN_KEY,
+          process.env.JWT_SECRET,
           {
-            expiresIn: "2h",
+            expiresIn: process.env.JWT_EXPIRES
           }
         );
   
@@ -129,16 +130,34 @@ const login = async (req, res) => {
     }
 };
 
-const reset = async (req,res) => {
-    try {
-        
-    } catch (error) {
-        
+const authorize = async (req,res,next) => {
+    try{
+        const token = req.cookies.jwt;
+        // console.log(token)
+        if (!token) return next(new appError(400, 'Please Login Again!'));
+
+        const decodedToken = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
+        console.log(decodedToken.id)
+        //Check if user exists
+        const currentUser =  User.findById(decodedToken.id);
+        //if (decoded.expiresIn > Date.now() + jwt_cookie_expires * 60 * 60 * 1000)
+        if (!currentUser)
+        return next(new appError(404, 'Session expired, Login again!'));
+        //Add user to req object
+        req.user = currentUser;
+        next();
+    }catch(err){
+        // console.log(err)
+        res.status(500).json({
+            message: 'error',
+            data: err
+        })
     }
 }
+    
 
 module.exports = {
     signup,
     login,
-    reset
+    authorize
 }
