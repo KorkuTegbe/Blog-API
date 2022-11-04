@@ -5,57 +5,20 @@ const User = require("../models/user.model");
 const Blog = require("../models/blog.model");
 const appError = require('../utils/appError')
 
-exports.createBlog = async (req, res) => {
+exports.createBlog = async (req, res, next) => {
   try {
-    // const { title, tags, body, description } = req.body;
-    // const { userId } = req.params;
-    // const authHeader = req.headers.authorization;
-    // if (!authHeader) {
-    //   return res.status(403).json({
-    //     status: 403,
-    //     message: "FORBIDDEN",
-    //   });
-    // }
-
-    // const token = authHeader.split(" ")[1];
-
-    // // verify token
-    // const verifyToken = jwt.verify(token, process.env.TOKEN_KEY);
-    
-    // const readingTime = "2mins"; //algo to calc reading time
-    // if(verifyToken.user_id == userId){
-        
-        // const blog = await Blog.create({
-        //     title,
-        //     tags,
-        //     body,
-        //     description,
-        //     author: verifyToken.user_id,
-        //     reading_time: readingTime,
-        // });
-        req.body.author = req.user_id
-        // console.log(req.body.author)
+        req.body.author = req.user
         const blog = await Blog.create(req.body)
-    // Response
+        // Response
         return res.status(201).json({
         status: "success",
         data: {
                 blog,
               },
-            });
-        // }else{
-        //     return res.status(403).json({
-        //         status: "failed",
-        //         message: "log in",
-        //     })
-        // }
+        });
 
     } catch (err) {
-        // res.status(err.statusCode).json({
-        //     status: statusCode,
-        //     message: 'Something went wrong'
-        // })
-        return next(new appError)
+        return next(new appError(err.statusCode, err))
   }
 }
 
@@ -81,10 +44,10 @@ exports.getBlogs = async (req,res,next) => {
 exports.updateBlog = async (req,res,next) => {
     try{
         //  1.get blog id and search
-        const blogId = req.params.blogId
+        const blogId = req.params.id
         const body = req.body
-        const blog = await Blog.find(blogId)
-
+        const blog = await Blog.findById(blogId)
+        console.log(blog)
         // when blog is not found
         if(!blogId) return next(new appError(404, 'Blog not found'))
 
@@ -106,6 +69,7 @@ exports.updateBlog = async (req,res,next) => {
             return next(new appError(403, 'Unauthorized'))
         }
     }catch (err){
+        console.log(err)
         return new appError(err.statusCode, err)
     }   
 }
@@ -114,8 +78,8 @@ exports.updateBlog = async (req,res,next) => {
 exports.deleteBlog = async (req,res,next) => {
     try{
         //  1.get blog id and search
-        const blogId = req.params.blogId
-        const blog = await Blog.find(blogId)
+        const blogId = req.params.id
+        const blog = await Blog.findById(blogId)
 
         // when blog is not found
         if(!blogId) return next(new appError(404, 'Blog not found'))

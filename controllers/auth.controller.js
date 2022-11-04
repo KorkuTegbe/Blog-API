@@ -132,22 +132,33 @@ const login = async (req, res) => {
 
 const authorize = async (req,res,next) => {
     try{
-        const token = req.cookies.jwt;
-        // console.log(token)
-        if (!token) return next(new appError(400, 'Please Login Again!'));
 
-        const decodedToken = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
-        console.log(decodedToken.id)
+        /** testing authorization**/ 
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(403).json({
+                status: 403,
+                message: "FORBIDDEN",
+            });
+        }
+
+        const token = authHeader.split(" ")[1];
+
+        // // verify token
+        const verifyToken = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(verifyToken)
         //Check if user exists
-        const currentUser =  User.findById(decodedToken.id);
-        //if (decoded.expiresIn > Date.now() + jwt_cookie_expires * 60 * 60 * 1000)
+        const currentUser = await User.findById(verifyToken.user_id)
+        
         if (!currentUser)
         return next(new appError(404, 'Session expired, Login again!'));
+
         //Add user to req object
         req.user = currentUser;
         next();
-    }catch(err){
-        // console.log(err)
+        /** end of **/
+    } catch(err){
+        console.log(err)
         res.status(500).json({
             message: 'error',
             data: err

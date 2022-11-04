@@ -44,15 +44,21 @@ const blogSchema = new mongoose.Schema({
 )
 
 
-blogSchema.pre(
-    'save', function (next){
-        this.populate({
-            path: 'author',
-            select: '-__v, -first_name, -last_name, -email, -password'
-        });
-        next();
-    }
-)
+// blogSchema.pre(/^find/, function (next) {
+//     this.populate({
+//         path: 'author',
+//         select: '-__v -password -email -_id'
+//     });
+//     next()
+// })
+
+blogSchema.pre(/^find/, function (next) {
+    this.populate({
+      path: 'author',
+      select: '-__v -password -email',
+    });
+    next();
+  });
 
 blogSchema.pre(
     '/^find/', function(next){
