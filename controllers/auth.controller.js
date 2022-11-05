@@ -146,7 +146,7 @@ const authorize = async (req,res,next) => {
 
         // // verify token
         const verifyToken = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(verifyToken)
+    
         //Check if user exists
         const currentUser = await User.findById(verifyToken.user_id)
         
@@ -158,7 +158,6 @@ const authorize = async (req,res,next) => {
         next();
         /** end of **/
     } catch(err){
-        console.log(err)
         res.status(500).json({
             message: 'error',
             data: err

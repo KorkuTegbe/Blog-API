@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const slugify = require('slugify')
 
 const objectId = mongoose.Schema.Types.ObjectId
 
@@ -7,6 +8,9 @@ const blogSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Your blog needs a title'],
         unique: true
+    },
+    slug: {
+        type: String
     },
     description: {
         type: String,
@@ -43,14 +47,10 @@ const blogSchema = new mongoose.Schema({
 }
 )
 
-
-// blogSchema.pre(/^find/, function (next) {
-//     this.populate({
-//         path: 'author',
-//         select: '-__v -password -email -_id'
-//     });
-//     next()
-// })
+blogSchema.pre('save', function (next) {
+    this.slug = slugify(this.title, { lower: true });
+    next();
+});
 
 blogSchema.pre(/^find/, function (next) {
     this.populate({

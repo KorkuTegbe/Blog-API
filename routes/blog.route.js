@@ -4,8 +4,10 @@ const authController = require('../controllers/auth.controller')
 
 router.post('/', authController.authorize,  blogController.createBlog)
 router.get('/', blogController.getBlogs)
-router.patch('/update/:id', authController.authorize, blogController.updateBlog)
-router.delete('/delete/:id', authController.authorize, blogController.deleteBlog)
+router.get('/:blogId', blogController.getABlog)
+router.patch('/update/:blogId', authController.authorize, blogController.updateBlog)
+router.get('/:id', authController.authorize, blogController.getOwnerBlogs)
+router.delete('/delete/:blogId', authController.authorize, blogController.deleteBlog)
 
 
 
