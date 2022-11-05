@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const LOCAL_MONGODB_URI = process.env.LOCAL_MONGODB_URI;
+const MONGODB_ATLAS_URI=process.env.MONGODB_ATLAS_URI
 
 // connect to mongodb
 function connectToMongoDB() {
-    mongoose.connect(LOCAL_MONGODB_URI);
+    mongoose.connect(MONGODB_ATLAS_URI);
 
     mongoose.connection.on('connected', () => {
         console.log('Connected to MongoDB successfully');
