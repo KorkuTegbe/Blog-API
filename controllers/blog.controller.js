@@ -56,9 +56,12 @@ exports.getBlogs = async (req,res,next) => {
         
         findQuery.state = 'published'
         
-        if (state=='draft'){
+        if(state){
+           if (state=='draft'){
             return next(new appError(403, 'You cannot view unpublished blogs'))
+            } 
         }
+        
         
         if(author){
             findQuery.author = author
