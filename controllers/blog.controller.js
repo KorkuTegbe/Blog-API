@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const Blog = require("../models/blog.model");
 const appError = require('../utils/appError')
+const slugify = require('slugify')
 
 
 const readingTime = (blog) => {
@@ -38,73 +39,56 @@ exports.createBlog = async (req, res, next) => {
 
 exports.getBlogs = async (req,res,next) => {
 
-    const { query } = req
-        const { state, 
-            page = 1, 
-            per_page = 5, 
-            author, 
-            title, 
-            tags, 
-            read_count, 
-            reading_time, 
-            createdAt,
-            order_by = 'reading_time',
-            order = 'asc' } = query
+    let query = Blog.find();
 
-        const findQuery = {}
-        const sortQuery = {}
-        
-        findQuery.state = 'published'
-        
-        if(state){
-           if (state=='draft'){
-            return next(new appError(403, 'You cannot view unpublished blogs'))
-            } 
-        }
-        
-        
-        if(author){
-            findQuery.author = author
-        }
-        if(title){
-            findQuery.title = title
-        }
-        if(tags){
-            // findQuery.tags = tags
-            findQuery.tags =  { $in: tags }
-        }
+    if (req.query.state == 'draft') {
+        return next(new appError(403, 'You cannot access unpublished articles!'));
+    } else {
+        query = Blog.find(req.query);
+    }
 
-        if (createdAt){
-            sortQuery.createdAt = {
-                $gt: new Date(createdAt).toISOString(),
-                $lt: new Date(createdAt).toISOString(),
-            }
+    if (req.query.author) {
+        const author = req.query.author;
+        const user = await User.findOne({ username: author });
+        const ID = user.id;
+        query = Blog.find({ author: ID });
+    }
+    
+    if (req.query.tag) {
+        const tag = req.query.tag.split(',');
+        query = Blog.find({ tags: tag });
+    }
+
+    if (req.query.title) {
+        const title = req.query.title;
+        query = Blog.findOne({ title: title });
+    }
+
+    if (req.query.read_count) {
+        const read_count = req.query.read_count;
+        query = Blog.findOne({ read_count: read_count });
+    }
+
+    if (req.query.reading_time) {
+        const reading_time = req.query.reading_time;
+        query = Blog.findOne({ reading_ti: reading_time });
+    }
+
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 20;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+
+    const blog = await query
+    if (blog.length == 0) return next(new appError(403, 'No Blog Found'))
+
+    res.status(200).json({
+        status: 'success',
+        results: blog.length,
+        data: {
+            blog
         }
-
-        const sortAttributes = order_by.split(',')
-
-        for(const attribute of sortAttributes){
-            if(order === 'asc' && order_by){
-            sortQuery[attribute] = 1
-            } else {
-                sortQuery[attribute] = -1
-            }
-        }
-        
-
-        const blog = await Blog.find()
-        .find(findQuery)
-        .sort(sortQuery)
-        .skip(page)
-        .limit(per_page)
-
-        res.status(200).json({
-            status: 'success',
-            results: blog.length,
-            data: {
-                blog
-            }
-        })
+    })
 }
 
 exports.updateBlog = async (req,res,next) => {
