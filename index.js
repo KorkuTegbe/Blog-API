@@ -19,14 +19,12 @@ app.use('/api/blog', blogRoute)
 app.use('/api/user', userRoute)
 // app.use('/auth', authRoute )
 
-
-
-// Handle errors.
-// app.use(function (err, req, res, next) {
-//     console.log(err);
-//     res.status(err.status || 500);
-//     res.json({ error: err.message });
-// });
+app.get('/', (req,res)=>{
+    res.status(200).json({
+        status: 'success',
+        message: 'Welcome to this blog API'
+    })
+})
 
 app.all('*', ( req,res,next ) =>{
     // res.status(500).json({
