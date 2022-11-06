@@ -50,7 +50,7 @@ This is an api for a blog. Altschool Africa Nodejs second semester project
 
 ---
 ## Base URL
-- https://encouraging-teal-codfish.cyclic.app/
+- https://myblogapi.cyclic.app/
 
 
 ## Models
