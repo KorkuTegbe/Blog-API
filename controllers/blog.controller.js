@@ -39,7 +39,7 @@ exports.createBlog = async (req, res, next) => {
 
 exports.getBlogs = async (req,res,next) => {
 
-    let query = Blog.find();
+    let query = Blog.find({state : 'published'});
 
     if (req.query.state == 'draft') {
         return next(new appError(403, 'You cannot access unpublished articles!'));
