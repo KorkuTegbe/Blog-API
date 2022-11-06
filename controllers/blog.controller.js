@@ -76,7 +76,7 @@ exports.getBlogs = async (req,res,next) => {
 
     const page = req.query.page * 1 || 1;
     const per_page = req.query.limit * 1 || 20;
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * per_page;
     query = query.skip(skip).limit(per_page);
 
     const blog = await query
