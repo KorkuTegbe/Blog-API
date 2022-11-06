@@ -75,9 +75,9 @@ exports.getBlogs = async (req,res,next) => {
     }
 
     const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 20;
+    const per_page = req.query.limit * 1 || 20;
     const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
+    query = query.skip(skip).limit(per_page);
 
     const blog = await query
     if (blog.length == 0) return next(new appError(403, 'No Blog Found'))
